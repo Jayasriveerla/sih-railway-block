@@ -1,0 +1,74 @@
+<script>
+    const MOCK_TRAINS = {
+        Section_Alpha: [
+            { id: "12703", name: "Falaknuma Express", start: "13:30", end: "14:20" },
+            { id: "17017", name: "Golconda Express", start: "16:00", end: "16:45" }
+        ],
+        Section_Beta: [
+            { id: "12760", name: "Charminar Express", start: "09:00", end: "09:40" },
+            { id: "22691", name: "Rajdhani Express", start: "14:15", end: "15:00" }
+        ]
+    };
+
+    function toMinutes(hhmm) {
+        const [h, m] = hhmm.split(":").map(Number);
+        return h * 60 + m;
+    }
+
+    function log(terminal, line) {
+        terminal.textContent += "\n" + line;
+        terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    function checkConflicts(sector, startTime, durationMin) {
+        const reqStart = toMinutes(startTime);
+        const reqEnd = reqStart + durationMin;
+        const trains = MOCK_TRAINS[sector] || [];
+        return trains.filter(t => {
+            const tStart = toMinutes(t.start);
+            const tEnd = toMinutes(t.end);
+            return reqStart < tEnd && tStart < reqEnd;
+        });
+    }
+
+    const form = document.getElementById("schedulerForm");
+    const terminal = document.getElementById("logTerminal");
+    const submitBtn = document.getElementById("submitBtn");
+    const durationInput = document.getElementById("durationInput");
+    const durationError = document.getElementById("durationError");
+
+    form.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const sector = document.getElementById("sectorSelect").value;
+        const sectorLabel = document.getElementById("sectorSelect").selectedOptions[0].textContent;
+        const startTime = document.getElementById("timeInput").value;
+        const duration = Number(durationInput.value);
+
+        if (!startTime || !duration || duration < 15 || duration > 240) {
+            durationError.style.display = "block";
+            return;
+        }
+        durationError.style.display = "none";
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Running de-confliction...";
+        log(terminal, "\n> Validating block request for " + sectorLabel + "...");
+
+        setTimeout(function () {
+            const conflicts = checkConflicts(sector, startTime, duration);
+            if (conflicts.length === 0) {
+                log(terminal, "[OK] No scheduling conflicts detected.");
+                log(terminal, "[OK] Block APPROVED: " + startTime + " for " + duration + " min on " + sectorLabel + ".");
+            } else {
+                log(terminal, "[WARN] " + conflicts.length + " conflict(s) detected:");
+                conflicts.forEach(function (t) {
+                    log(terminal, "  - Train " + t.id + " (" + t.name + ") occupies " + t.start + "-" + t.end + ".");
+                });
+                log(terminal, "[BLOCKED] Request denied. Suggest alternate window.");
+            }
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Run Algorithmic De-confliction";
+        }, 700);
+    });
+</script>
