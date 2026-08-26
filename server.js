@@ -4,7 +4,7 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 
 // Serve only the public folder, not the whole project directory
-const PUBLIC_DIR = path.join(__dirname, 'public');
+const PUBLIC_DIR =__dirname;
 app.use(express.static(PUBLIC_DIR));
 
 app.get('/', (req, res) => {
