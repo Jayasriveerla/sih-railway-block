@@ -1,9 +1,16 @@
 {
-  "name": "sih-railway-block",
+  "name": "sih-railway-block-planner",
   "version": "1.0.0",
+  "description": "AI Railway Block Optimization System",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
-  "dependencies": {}
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
 }
